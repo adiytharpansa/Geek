@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hello!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Caveat:wght@700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #101214;
+    --nav: #1c1f23;
+    --text: #e8eaed;
+    --muted: #bdc1c6;
+    --banner-bg: #fff3d6;
+    --banner-text: #1a1a1a;
+    --blue: #2f7cf6;
+    --avatar-me: #c7cbd6;
+    --avatar-pink-bg: #f3c6dd;
+    --avatar-pink: #b0006b;
+    --fab-cam: #20242a;
+    --fab-edit: #3a4150;
+    --pill: #2f3540;
+  }
+  body {
+    background: #000; color: var(--text);
+    font-family: "Plus Jakarta Sans", Roboto, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    display: flex; justify-content: center; min-height: 100vh;
+    letter-spacing: .1px;
+  }
+  .app {
+    width: 100%; max-width: 480px; min-height: 100vh;
+    background: var(--bg); display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+
+  /* Header */
+  header {
+    display: flex; align-items: center; gap: 18px;
+    padding: 16px 8px 10px 18px;
+  }
+  header h1 {
+    font-size: 22px; font-weight: 700; font-style: italic; flex: 1; padding-left: 6px;
+    letter-spacing: -.3px; color: #fff;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  header h1 #helloName {
+    font-weight: 800;
+    background: linear-gradient(100deg, #ffc7de, #ff7ab0);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .icon-btn {
+    width: 48px; height: 48px; border: 0; border-radius: 50%;
+    background: transparent; color: #c9cdd3; cursor: pointer;
+    display: grid; place-items: center;
+  }
+  .icon-btn svg { width: 28px; height: 28px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; }
+  .icon-btn.menu svg { fill: currentColor; stroke: none; }
+
+  /* Banner kedaluwarsa — tersembunyi, muncul otomatis bila ada pembaruan */
+  .banner {
+    display: none;
+    margin: 8px 14px 4px; background: var(--banner-bg); color: var(--banner-text);
+    border-radius: 16px; padding: 18px 18px 12px;
+    font-size: 19px; line-height: 1.35;
+  }
+  .banner.show { display: block; }
+  .banner a {
+    display: block; text-align: right; color: var(--blue);
+    font-weight: 600; text-decoration: none; margin-top: 16px; cursor: pointer;
+  }
+
+  /* Daftar chat */
+  main { flex: 1; overflow-y: auto; padding-bottom: 160px; }
+  .chat {
+    display: flex; gap: 14px; align-items: center; width: 100%;
+    padding: 14px 18px; background: none; border: 0;
+    color: inherit; text-align: left; cursor: pointer;
+  }
+  .chat:active { background: #1d2126; }
+  .avatar {
+    width: 58px; height: 58px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 28px;
+    background: var(--avatar-pink-bg); color: var(--avatar-pink);
+  }
+  .meta { flex: 1; min-width: 0; }
+  .row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .name { font-size: 21px; font-weight: 600; letter-spacing: -.2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .date { font-size: 17px; color: var(--muted); flex-shrink: 0; }
+  .row-sub {
+    display: flex; align-items: center; gap: 7px; margin-top: 2px;
+    color: var(--muted); font-size: 18px; font-style: italic;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .row-sub svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.6; flex-shrink: 0; }
+
+  /* FAB */
+  .fabs { position: absolute; right: 16px; bottom: 128px; display: flex; flex-direction: column; gap: 14px; }
+  .fab {
+    width: 68px; height: 68px; border: 0; border-radius: 22px;
+    display: grid; place-items: center; cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,.5);
+  }
+  .fab svg { width: 32px; height: 32px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .fab.cam { background: var(--fab-cam); }
+  .fab.edit { background: var(--fab-edit); }
+
+  /* Navigasi bawah */
+  nav {
+    position: absolute; left: 0; right: 0; bottom: 0; background: var(--nav);
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid #2a2e33;
+  }
+  .tabs { display: flex; }
+  .tab {
+    flex: 1; background: none; border: 0; color: var(--muted);
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    font-size: 18px; padding: 4px; cursor: pointer;
+  }
+  .tab .pill { padding: 6px 26px; border-radius: 999px; display: grid; place-items: center; }
+  .tab.active { color: #fff; }
+  .tab.active .pill { background: var(--pill); }
+  .tab svg { width: 30px; height: 30px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .tab.active[data-tab="obrolan"] svg { fill: #fff; stroke: #fff; }
+  .home-bar { width: 140px; height: 5px; border-radius: 99px; background: #8a8f98; margin: 12px auto 2px; opacity: .8; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+  .empty-state { padding: 60px 24px; text-align: center; color: var(--muted); font-size: 17px; }
+
+  /* Halaman chat demo (overlay penuh) */
+  .room {
+    position: absolute; inset: 0; background: var(--bg); z-index: 20;
+    display: none; flex-direction: column;
+  }
+  .room.open { display: flex; }
+  .room-head { display: flex; align-items: center; gap: 10px; padding: 12px 8px; border-bottom: 1px solid #2a2e33; }
+  .room-head .back { width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: #fff; font-size: 24px; cursor: pointer; }
+  .room-head .avatar { width: 44px; height: 44px; font-size: 22px; }
+  .room-head .who { flex: 1; min-width: 0; }
+  .room-head .who b { display: block; font-size: 19px; font-weight: 500; }
+  .room-head .who small { color: var(--muted); font-size: 14px; }
+  .demo-tag { font-size: 12px; background: #3a4150; color: #fff; border-radius: 6px; padding: 2px 8px; margin-left: 8px; vertical-align: middle; }
+  .msgs { flex: 1; overflow-y: auto; padding: 16px 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+  .bubble { max-width: 78%; padding: 10px 14px; border-radius: 16px; font-size: 17px; line-height: 1.5; letter-spacing: .1px; }
+  .bubble.in { align-self: flex-start; background: #22262b; }
+  .bubble.out { align-self: flex-end; background: #2f7cf6; color: #fff; }
+  .bubble small { display: block; font-size: 12px; opacity: .7; margin-top: 4px; text-align: right; }
+  .room-input { display: flex; gap: 8px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid #2a2e33; background: var(--nav); }
+  .room-input input { flex: 1; background: #101214; border: 1px solid #3a3f46; border-radius: 999px; color: #fff; padding: 12px 16px; font-size: 16px; outline: 0; }
+  .room-input button { width: 48px; height: 48px; border: 0; border-radius: 50%; background: #2f7cf6; color: #fff; font-size: 20px; cursor: pointer; }
+
+  /* Pengaturan aplikasi (overlay penuh) */
+  .settings { position: absolute; inset: 0; background: var(--bg); z-index: 30; display: none; flex-direction: column; }
+  .settings.open { display: flex; }
+  .set-head { display: flex; align-items: center; gap: 12px; padding: 12px 10px; border-bottom: 1px solid #2a2e33; }
+  .set-head .back { width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: #fff; font-size: 24px; cursor: pointer; }
+  .set-head b { font-size: 21px; font-weight: 500; }
+  .set-body { flex: 1; overflow-y: auto; padding-bottom: 30px; }
+  .profile { display: flex; gap: 14px; align-items: center; padding: 20px 18px; }
+  .profile .avatar { width: 64px; height: 64px; font-size: 30px; background: var(--avatar-me); color: #4a4e57; }
+  .profile b { font-size: 21px; display: block; }
+  .profile small { color: var(--muted); font-size: 15px; }
+  .profile button { margin-left: auto; background: none; border: 1px solid #3a3f46; color: #fff; border-radius: 999px; padding: 8px 16px; font-size: 15px; cursor: pointer; }
+  .group { margin: 6px 14px 0; background: #1a1d21; border-radius: 16px; overflow: hidden; }
+  .group-title { padding: 16px 18px 6px; color: var(--muted); font-size: 14px; }
+  .set-item { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 16px; background: none; border: 0; color: var(--text); font-size: 17px; text-align: left; cursor: pointer; border-top: 1px solid #2a2e33; }
+  .set-item:first-child { border-top: 0; }
+  .set-item .sub { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .set-item select { margin-left: auto; background: #101214; color: #fff; border: 1px solid #3a3f46; border-radius: 10px; padding: 8px; font-size: 15px; }
+  .switch { margin-left: auto; width: 50px; height: 30px; border-radius: 999px; background: #3a3f46; border: 0; position: relative; cursor: pointer; flex-shrink: 0; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; transition: .2s; }
+  .switch.on { background: #2f7cf6; }
+  .switch.on::after { left: 23px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>Hello, <span id="helloName">Pengguna</span>!</h1>
+    <button class="icon-btn" id="btnSearch" aria-label="Cari">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg>
+    </button>
+    <button class="icon-btn menu" id="btnMenu" aria-label="Menu">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- Tab: Obrolan (tampilan asli sesuai screenshot) -->
+    <section class="view active" id="view-obrolan">
+      <div class="banner" id="updateBanner">
+        Versi Hello! ini akan kedaluwarsa hari ini. Perbarui apabila ingin lanjut berkirim pesan.
+        <a id="updateNow">Perbarui sekarang</a>
+      </div>
+      <div id="chatList"></div>
+    </section>
+
+    <!-- Tab lain: kosong, siap dikembangkan -->
+    <section class="view" id="view-panggilan">
+      <div class="empty-state">Belum ada panggilan.</div>
+    </section>
+    <section class="view" id="view-cerita">
+      <div class="empty-state">Belum ada cerita.</div>
+    </section>
+  </main>
+
+  <div class="fabs">
+    <button class="fab cam" aria-label="Kamera">
+      <svg viewBox="0 0 24 24"><path d="M4 8h3l2-2h6l2 2h3v11H4Z"/><circle cx="12" cy="13" r="3.5"/></svg>
+    </button>
+    <button class="fab edit" aria-label="Obrolan baru">
+      <svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11a2.1 2.1 0 0 0-3-3L5 16l-1 4Z"/></svg>
+    </button>
+  </div>
+
+  <nav>
+    <div class="tabs">
+      <button class="tab active" data-tab="obrolan">
+        <span class="pill"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.7-1.2A9 9 0 1 0 12 3Z"/></svg></span>Obrolan
+      </button>
+      <button class="tab" data-tab="panggilan">
+        <span class="pill"><svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a12 12 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg></span>Panggilan
+      </button>
+      <button class="tab" data-tab="cerita">
+        <span class="pill"><svg viewBox="0 0 24 24"><rect x="7" y="3" width="11" height="18" rx="3"/><path d="M5 7a3 3 0 0 0-1 2v3l2 1v-3a3 3 0 0 1 1-1"/></svg></span>Cerita
+      </button>
+    </div>
+    <div class="home-bar"></div>
+  </nav>
+
+  <!-- Halaman chat demo -->
+  <div class="room" id="chatRoom">
+    <div class="room-head">
+      <button class="back" id="roomBack">←</button>
+      <div class="avatar" id="roomAvatar">D</div>
+      <div class="who"><b><span id="roomName">Demo</span><span class="demo-tag">DEMO</span></b><small>demo — bukan user asli</small></div>
+    </div>
+    <div class="msgs" id="roomMsgs"></div>
+    <form class="room-input" id="roomForm">
+      <input id="roomText" placeholder="Ketik pesan demo..." autocomplete="off">
+      <button type="submit">➤</button>
+    </form>
+  </div>
+
+  <!-- Pengaturan aplikasi -->
+  <div class="settings" id="settingsPage">
+    <div class="set-head">
+      <button class="back" id="setBack">←</button>
+      <b>Pengaturan</b>
+    </div>
+    <div class="set-body">
+      <div class="profile">
+        <div class="avatar" id="setAvatar">A</div>
+        <div><b id="setName">Pengguna Demo</b><small>+62 800-0000-0000 (demo)</small></div>
+        <button id="editProfile">Ubah</button>
+      </div>
+      <div class="group-title">Umum</div>
+      <div class="group">
+        <div class="set-item">Notifikasi<span class="sub">Bunyi & getar pesan masuk</span><button class="switch on" id="swNotif" aria-label="Notifikasi"></button></div>
+        <div class="set-item">Konfirmasi dibaca<span class="sub">Kirim tanda pesan dibaca</span><button class="switch on" id="swRead" aria-label="Konfirmasi dibaca"></button></div>
+        <div class="set-item">Kunci layar<span class="sub">Minta PIN saat dibuka</span><button class="switch" id="swLock" aria-label="Kunci layar"></button></div>
+      </div>
+      <div class="group-title">Tampilan & Bahasa</div>
+      <div class="group">
+        <div class="set-item">Ukuran font<span class="sub">Sesuaikan besar teks chat</span>
+          <select id="selFont"><option value="15">Kecil</option><option value="17" selected>Sedang</option><option value="19">Besar</option></select>
+        </div>
+        <div class="set-item">Bahasa<span class="sub">Bahasa aplikasi</span>
+          <select id="selLang"><option value="id" selected>Indonesia</option><option value="en">English</option></select>
+        </div>
+      </div>
+      <div class="group-title">Lainnya</div>
+      <div class="group">
+        <button class="set-item" id="btnStorage">Penyimpanan<span class="sub">Hapus data demo (chat & pesan)</span></button>
+        <button class="set-item" id="btnAbout">Tentang<span class="sub">Versi 1.0.0 (demo)</span></button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // === MODE DEMO: true = pakai data demo, false = pakai data user asli ===
+  // Nanti kalau sudah selesai, set DEMO_MODE = false dan isi realChats dari API / database.
+  const DEMO_MODE = true;
+
+  const demoChats = [
+    { name: "Dewislack (Demo)", date: "13 Apr", subtitle: "Panggilan video keluar", initial: "D" }
+  ];
+  const realChats = []; // TODO: isi dengan data user asli nanti
+
+  const chats = DEMO_MODE ? demoChats : realChats;
+
+  // Pesan demo per kontak (nanti ganti fetch ke backend asli)
+  const demoMessages = {
+    "Dewislack (Demo)": [
+      { me: false, text: "Halo, ini pesan demo 👋", time: "13.00" },
+      { me: true, text: "Oke, siap. Nanti diganti data asli.", time: "13.01" },
+      { me: false, text: "Panggilan video keluar (demo)", time: "13.02" }
+    ]
+  };
+
+  const videoIcon = '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="12" height="10" rx="2"/><path d="m14 10 6-3v10l-6-3"/></svg>';
+
+  const chatList = document.getElementById("chatList");
+  chats.forEach(c => {
+    const el = document.createElement("button");
+    el.className = "chat";
+    el.innerHTML =
+      '<div class="avatar">' + c.initial + '</div>' +
+      '<div class="meta">' +
+        '<div class="row-top"><div class="name">' + c.name + '</div><div class="date">' + c.date + '</div></div>' +
+        '<div class="row-sub">' + videoIcon + '<span>' + c.subtitle + '</span></div>' +
+      '</div>';
+    el.addEventListener("click", () => openDemoRoom(c));
+    chatList.appendChild(el);
+  });
+
+  // === Halaman chat demo ===
+  const room = document.getElementById("chatRoom");
+  const roomMsgs = document.getElementById("roomMsgs");
+  function openDemoRoom(c) {
+    document.getElementById("roomName").textContent = c.name;
+    document.getElementById("roomAvatar").textContent = c.initial;
+    roomMsgs.innerHTML = "";
+    (demoMessages[c.name] || [{ me: false, text: "Ini halaman demo. Nanti diganti chat asli user.", time: "" }])
+      .forEach(addBubble);
+    room.classList.add("open");
+  }
+  function addBubble(m) {
+    const d = document.createElement("div");
+    d.className = "bubble " + (m.me ? "out" : "in");
+    d.innerHTML = m.text + (m.time ? "<small>" + m.time + "</small>" : "");
+    roomMsgs.appendChild(d);
+    roomMsgs.scrollTop = roomMsgs.scrollHeight;
+  }
+  document.getElementById("roomBack").addEventListener("click", () => room.classList.remove("open"));
+  document.getElementById("roomForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const inp = document.getElementById("roomText");
+    if (!inp.value.trim()) return;
+    addBubble({ me: true, text: inp.value.trim(), time: "demo" });
+    inp.value = "";
+  });
+
+  // === Navigasi tab ===
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.getElementById("view-" + tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  // === Banner update: otomatis muncul hanya bila ada pembaruan ===
+  // Cara pakai: ubah latestVersion saat rilis baru, atau isi expiryDate (YYYY-MM-DD).
+  // Banner tersembunyi bila versi sudah terbaru dan belum kedaluwarsa.
+  const APP_CONFIG = {
+    version: "1.0.0",
+    latestVersion: "1.0.0",
+    expiryDate: null // contoh: "2026-12-31"
+  };
+
+  function shouldShowUpdateBanner() {
+    if (APP_CONFIG.latestVersion !== APP_CONFIG.version) return true;
+    if (APP_CONFIG.expiryDate) {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      if (today >= new Date(APP_CONFIG.expiryDate + "T00:00:00")) return true;
+    }
+    return false;
+  }
+
+  const updateBanner = document.getElementById("updateBanner");
+  if (shouldShowUpdateBanner()) updateBanner.classList.add("show");
+
+  document.getElementById("updateNow").addEventListener("click", function () {
+    updateBanner.classList.remove("show");
+  });
+
+  // === Pengaturan aplikasi (dibuka dari garis tiga) ===
+  const settingsPage = document.getElementById("settingsPage");
+  document.getElementById("btnMenu").addEventListener("click", () => settingsPage.classList.add("open"));
+  document.getElementById("setBack").addEventListener("click", () => settingsPage.classList.remove("open"));
+
+  // Toggle on/off + simpan ke localStorage
+  [["swNotif", "set_notif", true], ["swRead", "set_read", true], ["swLock", "set_lock", false]].forEach(([id, key, def]) => {
+    const btn = document.getElementById(id);
+    btn.classList.toggle("on", localStorage.getItem(key) === null ? def : localStorage.getItem(key) === "1");
+    btn.addEventListener("click", () => {
+      const on = !btn.classList.contains("on");
+      btn.classList.toggle("on", on);
+      localStorage.setItem(key, on ? "1" : "0");
+    });
+  });
+
+  // Ukuran font chat
+  const selFont = document.getElementById("selFont");
+  selFont.value = localStorage.getItem("set_font") || "17";
+  const applyFont = () => document.querySelectorAll(".bubble").forEach(b => b.style.fontSize = selFont.value + "px");
+  selFont.addEventListener("change", () => { localStorage.setItem("set_font", selFont.value); applyFont(); });
+
+  // Profil demo: ubah nama (tampil juga sebagai sapaan Hello, ...!)
+  const helloName = document.getElementById("helloName");
+  document.getElementById("editProfile").addEventListener("click", () => {
+    const cur = document.getElementById("setName").textContent;
+    const next = prompt("Nama profil (demo):", cur);
+    if (next && next.trim()) {
+      document.getElementById("setName").textContent = next.trim();
+      document.getElementById("setAvatar").textContent = next.trim()[0].toUpperCase();
+      helloName.textContent = next.trim().split(" ")[0];
+      localStorage.setItem("set_name", next.trim());
+    }
+  });
+  const savedName = localStorage.getItem("set_name");
+  if (savedName) {
+    document.getElementById("setName").textContent = savedName;
+    document.getElementById("setAvatar").textContent = savedName[0].toUpperCase();
+    helloName.textContent = savedName.split(" ")[0];
+  }
+
+  // Hapus data demo
+  document.getElementById("btnStorage").addEventListener("click", () => {
+    if (confirm("Hapus semua data demo?")) { localStorage.clear(); location.reload(); }
+  });
+  document.getElementById("btnAbout").addEventListener("click", () => {
+    alert("Aplikasi demo v1.0.0\nNanti sambungkan ke data asli.");
+  });
+</script>
+</body>
+</html>
